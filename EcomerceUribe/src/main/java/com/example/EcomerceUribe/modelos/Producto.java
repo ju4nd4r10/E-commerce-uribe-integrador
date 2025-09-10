@@ -1,8 +1,16 @@
 package com.example.EcomerceUribe.modelos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="producto")
 public class Producto {
 
     //Integer id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     //String nombre
     //String fotografia
     //String descripcion
@@ -11,4 +19,22 @@ public class Producto {
     //String marca
     //boolean aplicaDescuento
 
+    @ManyToOne
+    @JoinColumn(name = "fk_pedido", referencedColumnName = "id")
+    @JsonBackReference(value = "relacionpedidoproducto")
+    private Pedido pedido;
+    public Producto() {
+    }
+
+    public Producto(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }
