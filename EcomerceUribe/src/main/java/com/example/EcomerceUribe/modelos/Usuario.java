@@ -37,6 +37,13 @@ public class Usuario {
     @JsonBackReference(value = "relacionempleadousuario")
     private Empleado empleado;
 
+
+    // RELACIÓN UNO A UNO CON CLIENTE
+    @OneToOne(mappedBy = "usuario")
+    @JsonBackReference(value = "relacionclienteusuario")
+    private Cliente cliente;
+
+
     public Usuario() {
     }
 

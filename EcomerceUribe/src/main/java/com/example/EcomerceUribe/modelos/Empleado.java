@@ -27,6 +27,9 @@ public class Empleado {
     @JsonManagedReference(value = "relacionempleadousuario")
     private Usuario usuario;
 
+
+
+
     public Empleado() {
     }
 
@@ -67,5 +70,9 @@ public class Empleado {
 
     public void setSede(Sedes sede) {
         this.sede = sede;
+    }
+
+    public String getCorreo() {
+        return "";
     }
 }
