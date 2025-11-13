@@ -1,14 +1,14 @@
 package com.example.EcomerceUribe.modelos.DTOS;
 
-public class ProductoDetalleDTO {
+public class ProductoResumenDTO {
 
     private String nombre;
     private Double precio;
     private Integer stock;
 
-    public ProductoDetalleDTO() {}
+    public ProductoResumenDTO() {}
 
-    public ProductoDetalleDTO(String nombre, Double precio, Integer stock) {
+    public ProductoResumenDTO(String nombre, Double precio, Integer stock) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;

@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class UsuarioServicio {
 
@@ -35,35 +38,114 @@ public class UsuarioServicio {
         //Validacion de que el nombre  no esta vacio
         if (datosUsuario.getNombres() == null || datosUsuario.getNombres().isBlank()) {
             throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
+                    HttpStatus.BAD_REQUEST,
                     "El nombre del usuario es obligatorio"
-        ) ;
+            );
 
-    }
+        }
         //Validacion de caracteres minimos en la contraseña
-    if (datosUsuario.getContraseña().length()<6){
-        throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "La contraseña debe tener al menos 6 caracteres"
-        );
+        if (datosUsuario.getContraseña().length() < 6) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La contraseña debe tener al menos 6 caracteres"
+            );
+
+        }
+
+
+        //Intentar guardar el usuario
+        Usuario usuarioQueGuardoRepo = this.repositorio.save(datosUsuario);
+        if (usuarioQueGuardoRepo == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La contraseña debe tener al menos 6 caracteres"
+
+            );
+        }
+
+        //Retornar el  dto al controlador
+        return this.mapa.convertir_usuario_a_usuariogenericodto(usuarioQueGuardoRepo);
+
 
     }
 
+    public List<UsuarioGenericoDTO> buscarTodosLosUsuarios() {
+        List<Usuario> listaDeUsuariosConsultados = this.repositorio.findAll();
+        return this.mapa.convertir_lista_a_listadtogenerico(listaDeUsuariosConsultados);
+    }
 
-            //Intentar guardar el usuario
-            Usuario usuarioQueGuardoRepo=this.repositorio.save(datosUsuario);
-            if (usuarioQueGuardoRepo==null){
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "La contraseña debe tener al menos 6 caracteres"
+    //Buscar un usuario por ID
 
-                );
-            }
-
-            //Retornar el  dto al controlador
-            return this.mapa.convertir_usuario_a_usuariogenericodto(usuarioQueGuardoRepo);
+    public UsuarioGenericoDTO buscarUsuarioGenericoPorId(Integer id) {
+        Optional<Usuario> usuarioQueEstoyBuscando = this.repositorio.findById(id);
+        if (usuarioQueEstoyBuscando.isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontro el usuario con el id " + id + " suministrado"
+            );
+        }
+        Usuario usuarioEncontrado = usuarioQueEstoyBuscando.get();
+        return this.mapa.convertir_usuario_a_usuariogenericodto(usuarioEncontrado);
 
 
     }
+
+    //Eliminar usuario
+
+    public void eliminarUsuario(Integer id) {
+        Optional<Usuario> usuarioQueEstoyBuscando = this.repositorio.findById(id);
+        if (!usuarioQueEstoyBuscando.isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontro el usuario con el id " + id + " suministrado"
+            );
+        }
+        Usuario usuarioEncontrado = usuarioQueEstoyBuscando.get();
+        try {
+            this.repositorio.delete(usuarioEncontrado);
+        } catch (Exception error) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo eliminar el usuario " + error.getMessage()
+            );
+        }
+    }
+
+    // Modificar algunos datos de un usuario
+    public UsuarioGenericoDTO actualizarUsuario(Integer id, Usuario datosActualizados) {
+        Optional<Usuario> usuarioQueEstoyBuscando = this.repositorio.findById(id);
+        if (!usuarioQueEstoyBuscando.isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontro ningun usuario con el id  " + id + " suministrado"
+            );
+
+        }
+        Usuario usuarioEncontrado = usuarioQueEstoyBuscando.get();
+
+        // Aplicar validaciones sobre los datos que se mandaron desde el front
+
+
+        //Actualizo los campos que se permitieron modificar
+        //Nombre //Correo
+
+        usuarioEncontrado.setNombres(datosActualizados.getNombres());
+        usuarioEncontrado.setCorreo(datosActualizados.getCorreo());
+
+
+        //concluyo la operacion en la base de datos
+        Usuario usuarioActualizado = this.repositorio.save(usuarioEncontrado);
+
+
+        if (usuarioActualizado == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al actualizar el usuario en la base de datos, intenta nuevamente"
+            );
+
+        }
+
+        return this.mapa.convertir_usuario_a_usuariogenericodto(usuarioActualizado);
+    }
+
 }
-
